@@ -11,81 +11,116 @@ import {
   SidebarMenuButton,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { 
-  Home, MessageCircle,  Trophy, User, PanelLeftIcon, 
-  ChevronRight, ChevronDown, 
+import {
+  Home,
+  MessageCircle,
+  Trophy,
+  User,
+  PanelLeftIcon,
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
+import Link from "next/link";
+
 export function AppSidebar() {
-  const [activeItem, setActiveItem] = useState("Dashboard");
-  const [isAchievementsOpen, setIsAchievementsOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
- 
+  
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>({
+    Achievements: false,
+    Profile: false,
+  });
+
   const menuItems = [
-    { name: "Dashboard", icon: <Home className="mr-2 h-4 w-4" /> },
-    { name: "Ask True Mother", icon: <MessageCircle className="mr-2 h-4 w-4" /> },
+    { name: "Dashboard", url: "/", icon: <Home className="mr-2 h-4 w-4" /> },
+    {
+      name: "Ask True Mother",
+      icon: <MessageCircle className="mr-2 h-4 w-4" />,
+      url: "/askTrueMother",
+    },
     {
       name: "Achievements",
       icon: <Trophy className="mr-2 h-4 w-4" />,
-      subLinks: ["All Achievements", "Monthly Challenges", "Leaderboard"],
-      isOpen: isAchievementsOpen,
-      setOpen: setIsAchievementsOpen,
+      subLinks: [
+        { name: "All Achievements", url: "/allAchievements" },
+        { name: "Monthly Challenges", url: "/monthlyChallenges" },
+        { name: "Leaderboard", url: "/leaderboard" },
+      ],
     },
     {
       name: "Profile",
       icon: <User className="mr-2 h-4 w-4" />,
-      subLinks: ["Account Setting", "Privacy", "Notifications"],
-      isOpen: isProfileOpen,
-      setOpen: setIsProfileOpen,
+      subLinks: [
+        { name: "Account Setting", url: "/accountSettings" },
+        { name: "Privacy", url: "/privacy" },
+        { name: "Notifications", url: "/notifications" },
+      ],
     },
   ];
+
+
+  const toggleItem = (itemName: string) => {
+    setOpenItems((prev) => ({
+      ...prev,
+      [itemName]: !prev[itemName],
+    }));
+  };
 
   return (
     <Sidebar className="h-screen" collapsible="icon">
       <SidebarHeader className="flex items-center justify-between p-4">
-        <SidebarContent className="text-lg font-semibold group-data-[collapsible=icon]:hidden">FAMILY FEDERATION</SidebarContent>
+        <SidebarContent className="text-lg font-semibold group-data-[collapsible=icon]:hidden">
+          FAMILY FEDERATION
+        </SidebarContent>
         <SidebarTrigger className="md:hidden">
           <PanelLeftIcon className="h-5 w-5" />
         </SidebarTrigger>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup >
+        <SidebarGroup>
           <SidebarMenu>
             {menuItems.map((item) => (
-              <div key={item.name}>
-                <SidebarMenuItem>
-                <SidebarMenuButton
-  className={`flex items-center justify-between p-2 rounded-md w-full text-sm font-medium transition-colors duration-200 ${
-    activeItem === item.name ? "bg-[#EAEAEA] text-[#28303F] font-[Readex Pro]" : "text-gray-700"
-  }`}
-  onClick={() => {
-    if (item.subLinks) {
-      item.setOpen(!item.isOpen);
-    } else {
-      setActiveItem(item.name);
-    }
-  }}
->
-  <div className="flex items-center">
-    {item.icon}
-    <span className="group-data-[collapsible=icon]:hidden">{item.name}</span>
-  </div>
-  {item.subLinks && (item.isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />)}
-</SidebarMenuButton>
+              <div key={item.name} >
+                <SidebarMenuItem >
+                  {item.url ? (
+                    <Link href={item.url} passHref>
+                      <SidebarMenuButton className="flex items-center cursor-pointer justify-between p-2 rounded-md w-full text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors duration-200">
+                        <div className="flex items-center">
+                          {item.icon}
+                          <span className="group-data-[collapsible=icon]:hidden">
+                            {item.name}
+                          </span>
+                        </div>
+                      </SidebarMenuButton>
+                    </Link>
+                  ) : (
+                    <SidebarMenuButton
+                      className="flex cursor-pointer items-center justify-between p-2 rounded-md w-full text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors duration-200"
+                      onClick={() => toggleItem(item.name)}
+                    >
+                      <div className="flex items-center">
+                        {item.icon}
+                        <span className="group-data-[collapsible=icon]:hidden">
+                          {item.name}
+                        </span>
+                      </div>
+                      {item.subLinks &&
+                        (openItems[item.name] ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        ))}
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
 
-                {item.subLinks && item.isOpen && (
+                {item.subLinks && openItems[item.name] && (
                   <div className="ml-6">
                     {item.subLinks.map((subLink) => (
-                      <SidebarMenuItem key={subLink}>
-                        <SidebarMenuButton
-                          className={`p-2 text-sm rounded-md w-full flex items-center gap-2 transition-colors duration-200 ${
-                            activeItem === subLink ? "bg-[#EAEAEA] text-[#28303F] font-[Readex Pro]" : "text-gray-500"
-                          }`}
-                          onClick={() => setActiveItem(subLink)}
-                        >
-                          {activeItem === subLink && <ChevronRight className="h-4 w-4 text-[#28303F]" />}
-                          {subLink}
-                        </SidebarMenuButton>
+                      <SidebarMenuItem key={subLink.name} >
+                        <Link href={subLink.url} passHref>
+                          <SidebarMenuButton className="p-2 cursor-pointer text-sm rounded-md w-full flex items-center gap-2 text-gray-500 hover:bg-gray-200 transition-colors duration-200">
+                            {subLink.name}
+                          </SidebarMenuButton>
+                        </Link>
                       </SidebarMenuItem>
                     ))}
                   </div>
